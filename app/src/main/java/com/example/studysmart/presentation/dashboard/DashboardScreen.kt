@@ -37,6 +37,7 @@ import com.example.studysmart.R
 import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.presentation.components.CountCard
 import com.example.studysmart.presentation.components.SubjectCard
+import com.example.studysmart.presentation.components.tasksList
 
 @Composable
 fun DashboardScreen() {
@@ -84,6 +85,14 @@ fun DashboardScreen() {
                         text ="Start Study Session" )
                 }
             }
+
+            tasksList(
+                sectionTitle = "UPCOMING TASK",
+                emptyListText = "You don't have any upcoming task. \n" +
+                "Please click on the + icon to add new task.",
+                tasks = emptyList()
+
+            )
         }
 
     }
