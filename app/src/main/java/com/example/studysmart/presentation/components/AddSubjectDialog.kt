@@ -49,10 +49,18 @@ fun AddSubjectDialogBox(
     var subjectNameError by rememberSaveable { mutableStateOf<String?>("") }
     var goalHoursError by rememberSaveable { mutableStateOf<String?>("") }
 
+    goalHoursError = when{
+        goalHours.isBlank() -> "Please enter goal study hours."
+        goalHours.toFloatOrNull() == null -> "Invalid number."
+        goalHours.toFloat() <1f ->"Please set at least 1 hour."
+        goalHours.toFloat()>1000f -> "Please set a maximum of 1000 hours."
+        else ->null
+    }
+
     subjectNameError = when{
         subjectName.isBlank() -> "Please enter subject name."
         subjectName.length<2 -> "Subject name is too short."
-        subjectName.length>2 -> "Subject name is too long."
+        subjectName.length>20 -> "Subject name is too long."
         else ->null
     }
 
@@ -91,6 +99,8 @@ fun AddSubjectDialogBox(
                         onValueChange = onSubjectNameChange,
                         label = { Text(text = "Subject Name")},
                         singleLine = true,
+                        isError = subjectNameError!=null && subjectName.isNotBlank(),
+                        supportingText = { Text(text = subjectNameError.orEmpty())}
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
@@ -98,6 +108,8 @@ fun AddSubjectDialogBox(
                         onValueChange = onGoalHoursChange,
                         label = { Text(text = "Goal Study Hours")},
                         singleLine = true,
+                        isError = goalHoursError!=null && goalHours.isNotBlank(),
+                        supportingText = { Text(text = goalHoursError.orEmpty())},
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
@@ -105,14 +117,17 @@ fun AddSubjectDialogBox(
 
             },
             confirmButton = {
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = "Cancel")
+                TextButton(
+                    onClick = onConfirmButtonClick,
+                    enabled = subjectNameError==null && goalHoursError==null
+                    ) {
+                    Text(text = "Save")
 
                 }
             },
             dismissButton = {
-                TextButton(onClick = onConfirmButtonClick) {
-                    Text(text = "Save")
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = "Cancel")
                 }
             }
         )

@@ -45,6 +45,7 @@ import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.domain.model.Task
 import com.example.studysmart.presentation.components.AddSubjectDialogBox
 import com.example.studysmart.presentation.components.CountCard
+import com.example.studysmart.presentation.components.DeleteDialog
 import com.example.studysmart.presentation.components.SubjectCard
 import com.example.studysmart.presentation.components.studySessionList
 import com.example.studysmart.presentation.components.tasksList
@@ -149,6 +150,7 @@ fun DashboardScreen() {
     )
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
     var subjectName by remember{ mutableStateOf("") }
     var goalHours by remember{ mutableStateOf("") }
     var selectedColor by remember {
@@ -168,6 +170,17 @@ fun DashboardScreen() {
             isAddSubjectDialogOpen = false
         }
     )
+
+    DeleteDialog(
+        isOpen = isDeleteDialogOpen,
+        title = "Delete Session",
+        bodyText = "Are you sure you want to delete this session ? your study hours will be reduced " +
+        "by this session time. This action can not be undone.",
+        onDismissRequest = { isDeleteDialogOpen = false },
+        onConfirmButtonClick = { isDeleteDialogOpen = false }
+    )
+
+
 
 
 
@@ -231,7 +244,7 @@ fun DashboardScreen() {
                 "Start a study session to begin recording your progress.",
                 //sessions = emptyList(),
                 sessions = sessions,
-                onDeleteIconClick = {}
+                onDeleteIconClick = { isDeleteDialogOpen = true }
 
             )
         }
