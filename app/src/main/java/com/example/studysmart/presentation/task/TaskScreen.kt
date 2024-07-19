@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,26 +29,36 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.studysmart.presentation.components.DeleteDialog
+import com.example.studysmart.presentation.components.SubjectListButtonShit
 import com.example.studysmart.presentation.components.TaskCheckBox
+import com.example.studysmart.presentation.components.TaskDatePicker
 import com.example.studysmart.presentation.theme.Red
+import com.example.studysmart.subjects
 import com.example.studysmart.util.Priority
+import com.example.studysmart.util.changeMillisToDateString
+import kotlinx.coroutines.launch
+import java.time.Instant
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen() {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    
     var taskTitleError by rememberSaveable { mutableStateOf<String?>(null) }
     taskTitleError = when{
         title.isBlank()->"Please enter a task title."
@@ -52,6 +66,44 @@ fun TaskScreen() {
         title.length>30 ->"Task title is too long."
         else -> null
     }
+    var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = Instant.now().toEpochMilli()  // set the current date as a initial date
+    )
+    var sheetState  = rememberModalBottomSheetState()
+    var isBottomShitOpen by remember { mutableStateOf(false) }
+    var scope = rememberCoroutineScope()
+
+    DeleteDialog(
+        isOpen =isDeleteDialogOpen ,
+        title = "Delete Task",
+        bodyText = "Are you sure you want to delete this Task ? All related " +
+                "task and study session permanently deleted . This action can not be undone.",
+        onDismissRequest = { isDeleteDialogOpen = false },
+        onConfirmButtonClick = { isDeleteDialogOpen = false }
+    )
+    TaskDatePicker(
+        state =datePickerState ,
+        isOpen =isDatePickerDialogOpen ,
+        onDismissRequest = { isDatePickerDialogOpen = false },
+        onConfirmButtonClick = {isDatePickerDialogOpen = false}
+    )
+
+    SubjectListButtonShit(
+        sheetState = sheetState,
+        isOpen = isBottomShitOpen,
+        subjects = subjects ,
+        onSubjectClicked ={
+                          scope.launch { sheetState.hide() }.invokeOnCompletion {
+                              if (!sheetState.isVisible)isBottomShitOpen = false
+                          }
+        },
+        onDismissRequest = {isBottomShitOpen = false}
+
+    )
+
+
     Scaffold(
         topBar = {
             TaskScreenTopBar(
@@ -59,13 +111,14 @@ fun TaskScreen() {
                 isComplete = false,
                 checkBoxBorderColor = Red,
                 onBackButtonClick = { /*TODO*/ },
-                onDeleteButtonClick = { /*TODO*/ },
+                onDeleteButtonClick = { isDeleteDialogOpen = true },
                 onCheckBoxClick = {}
             )
 
         }
     ) {paddingValue->
         Column(modifier = Modifier
+            .verticalScroll(state = rememberScrollState())
             .fillMaxSize()
             .padding(paddingValue)
             .padding(horizontal = 12.dp)
@@ -93,9 +146,9 @@ fun TaskScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically)
             {
-                Text(text = "English", style = MaterialTheme.typography.bodyLarge)
+                Text(text = datePickerState.selectedDateMillis.changeMillisToDateString(), style = MaterialTheme.typography.bodyLarge)
                 IconButton(
-                    onClick = { /*TODO*/ }) {
+                    onClick = { isDatePickerDialogOpen = true }) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription ="Select due date" )
@@ -123,6 +176,31 @@ fun TaskScreen() {
 
                     )
                 }
+
+            }
+            Spacer(modifier = Modifier.height(30.dp))
+            Text(text = "Related to Subject", style = MaterialTheme.typography.bodySmall)
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically)
+            {
+                Text(text = "English", style = MaterialTheme.typography.bodyLarge)
+                IconButton(
+                    onClick = { isBottomShitOpen = true }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription ="Select subject" )
+
+                }
+            }
+            Button(
+                enabled = taskTitleError == null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                    onClick = { /*TODO*/ }) {
+                Text(text = "Save")
 
             }
         }
