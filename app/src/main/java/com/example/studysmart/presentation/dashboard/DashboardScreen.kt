@@ -49,14 +49,50 @@ import com.example.studysmart.presentation.components.DeleteDialog
 import com.example.studysmart.presentation.components.SubjectCard
 import com.example.studysmart.presentation.components.studySessionList
 import com.example.studysmart.presentation.components.tasksList
+import com.example.studysmart.presentation.destinations.SessionScreenRouteDestination
+import com.example.studysmart.presentation.destinations.SubjectScreenRouteDestination
+import com.example.studysmart.presentation.destinations.TaskScreenRouteDestination
+import com.example.studysmart.presentation.subject.SubjectScreenNavArgs
+import com.example.studysmart.presentation.task.TaskScreenNavArgs
 import com.example.studysmart.sessions
 import com.example.studysmart.subjects
 import com.example.studysmart.tasks
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+@Destination(start=true)
+@Composable
+fun DashBoardScreenRoute(
+navigator:DestinationsNavigator
+) {
+    DashboardScreen(
+        onSubjectCardClick = {
+            subjectId->
+            subjectId?.let {
+                val navArg = SubjectScreenNavArgs(subjectId=subjectId)
+                navigator.navigate(SubjectScreenRouteDestination(navArgs = navArg))
+            }
+        },
+        onTaskCardClick ={
+            taskId->
+            val navArg = TaskScreenNavArgs(taskId = taskId, subjectId = null)
+            navigator.navigate(TaskScreenRouteDestination(navArgs = navArg))
+        },
+        onStartSessionButtonClick = {
+            navigator.navigate(SessionScreenRouteDestination())
+        }
+    )
+
+
+}
+
 
 @Composable
-fun DashboardScreen() {
-
-
+private fun DashboardScreen(
+    onSubjectCardClick:(Int?)->Unit,
+    onTaskCardClick:(Int?)->Unit,
+    onStartSessionButtonClick:()->Unit,
+) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -89,11 +125,6 @@ fun DashboardScreen() {
         onConfirmButtonClick = { isDeleteDialogOpen = false }
     )
 
-
-
-
-
-
     Scaffold(
         topBar = {DashboardScreenTopBar()}
     ) {
@@ -116,13 +147,14 @@ fun DashboardScreen() {
                     subjectList = subjects,
                     onAddIconClicked = {
                         isAddSubjectDialogOpen = true
-                    }
+                    },
+                    onSubjectCardClick = onSubjectCardClick
                 )
             }
 
             item{
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = onStartSessionButtonClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp, vertical = 20.dp)
@@ -140,7 +172,7 @@ fun DashboardScreen() {
                 //tasks = emptyList()
                 tasks = tasks,
                 onCheckBoxClick = {},
-                onTaskCardClick = {}
+                onTaskCardClick = onTaskCardClick
 
             )
             item {
@@ -212,7 +244,8 @@ private fun SubjectCardSection(
     modifier: Modifier = Modifier,
     subjectList: List<Subject>,
     emptyListText: String = "You don't have any Subjects. \n Click the + button to add new Subjects.",
-    onAddIconClicked:()->Unit
+    onAddIconClicked:()->Unit,
+    onSubjectCardClick: (Int?) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -261,7 +294,7 @@ private fun SubjectCardSection(
                     SubjectCard(
                         subjectName = subject.name,
                         gradientColors = subject.colors,
-                        onClick = {}
+                        onClick = {onSubjectCardClick(subject.subjectId)}
                     )
 
 
