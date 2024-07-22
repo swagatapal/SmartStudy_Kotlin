@@ -39,6 +39,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.studysmart.R
 import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.model.Subject
@@ -65,6 +67,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun DashBoardScreenRoute(
 navigator:DestinationsNavigator
 ) {
+
+    val viewModel: DashBoardViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     DashboardScreen(
         onSubjectCardClick = {
             subjectId->
@@ -96,6 +102,7 @@ private fun DashboardScreen(
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
+
     var subjectName by remember{ mutableStateOf("") }
     var goalHours by remember{ mutableStateOf("") }
     var selectedColor by remember {
@@ -293,7 +300,7 @@ private fun SubjectCardSection(
                 items(subjectList) { subject ->
                     SubjectCard(
                         subjectName = subject.name,
-                        gradientColors = subject.colors,
+                        gradientColors = subject.colors.map { Color(it) },
                         onClick = {onSubjectCardClick(subject.subjectId)}
                     )
 

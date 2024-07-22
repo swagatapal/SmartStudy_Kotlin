@@ -6,6 +6,10 @@ import androidx.room.TypeConverters
 import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.domain.model.Task
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+
 
 @Database(
     entities = [Subject::class, Session:: class, Task::class],

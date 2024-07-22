@@ -1,12 +1,16 @@
 package com.example.studysmart.data.repository
 
+import com.example.studysmart.data.local.SessionDao
 import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.repository.SessionRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class SessionRepositoryImpl:SessionRepository {
+class SessionRepositoryImpl @Inject constructor(
+    private val sessionDao: SessionDao
+):SessionRepository {
     override suspend fun insertSession(session: Session) {
-        TODO("Not yet implemented")
+        sessionDao.insertSession(session)
     }
 
     override suspend fun deleteSession(session: Session) {
@@ -26,7 +30,7 @@ class SessionRepositoryImpl:SessionRepository {
     }
 
     override fun getTotalSessionDuration(): Flow<Long> {
-        TODO("Not yet implemented")
+        return sessionDao.getTotalSessionDuration()
     }
 
     override fun getTotalSessionDurationBySubjectId(subjectId: Int): Flow<Long> {

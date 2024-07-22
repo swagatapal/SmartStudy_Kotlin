@@ -3,13 +3,17 @@ package com.example.studysmart
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.graphics.toArgb
 import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.domain.model.Task
 import com.example.studysmart.presentation.NavGraphs
 import com.example.studysmart.presentation.theme.StudySmartTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,11 +26,11 @@ class MainActivity : ComponentActivity() {
 }
 
 val subjects = listOf(
-    Subject(name = "English", goalHours = 12f, colors = Subject.subjectCardColors[0], subjectId = 0),
-    Subject(name = "Physics", goalHours = 12f, colors = Subject.subjectCardColors[0], subjectId = 0),
-    Subject(name = "Math", goalHours = 12f, colors = Subject.subjectCardColors[0], subjectId = 0),
-    Subject(name = "Computer", goalHours = 12f, colors = Subject.subjectCardColors[0], subjectId = 0),
-    Subject(name = "Geography", goalHours = 12f, colors = Subject.subjectCardColors[0], subjectId = 0),
+    Subject(name = "English", goalHours = 12f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Physics", goalHours = 12f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Math", goalHours = 12f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Computer", goalHours = 12f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Geography", goalHours = 12f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
 )
 
 val tasks = listOf(

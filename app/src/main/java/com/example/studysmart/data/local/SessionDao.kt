@@ -1,11 +1,13 @@
 package com.example.studysmart.data.local
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.studysmart.domain.model.Session
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface SessionDao {
 
     @Insert
