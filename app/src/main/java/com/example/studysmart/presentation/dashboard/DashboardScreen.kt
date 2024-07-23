@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,14 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,7 +54,6 @@ import com.example.studysmart.presentation.destinations.TaskScreenRouteDestinati
 import com.example.studysmart.presentation.subject.SubjectScreenNavArgs
 import com.example.studysmart.presentation.task.TaskScreenNavArgs
 import com.example.studysmart.sessions
-import com.example.studysmart.subjects
 import com.example.studysmart.tasks
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -70,9 +66,13 @@ navigator:DestinationsNavigator
 
     val viewModel: DashBoardViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
+    val recentSessions by viewModel.recentSessions.collectAsStateWithLifecycle()
 
     DashboardScreen(
         state = state,
+        tasks = tasks,
+        recentSessions = recentSessions,
         onEvent = viewModel::onEvent,
         onSubjectCardClick = {
             subjectId->
@@ -98,6 +98,8 @@ navigator:DestinationsNavigator
 @Composable
 private fun DashboardScreen(
     state: DashBoardState,
+    tasks: List<Task>,
+    recentSessions: List<Session>,
     onEvent: (DashboardEvent)->Unit,
     onSubjectCardClick:(Int?)->Unit,
     onTaskCardClick:(Int?)->Unit,
@@ -135,7 +137,7 @@ private fun DashboardScreen(
         "by this session time. This action can not be undone.",
         onDismissRequest = { isDeleteDialogOpen = false },
         onConfirmButtonClick = {
-            onEvent(DashboardEvent.DeleteSubject)
+            onEvent(DashboardEvent.DeleteSession)
             isDeleteDialogOpen = false
         }
     )
@@ -205,7 +207,7 @@ private fun DashboardScreen(
                 emptyListText = "You don't have any recent study sessions.\n" +
                 "Start a study session to begin recording your progress.",
                 //sessions = emptyList(),
-                sessions = sessions,
+                sessions = recentSessions,
                 onDeleteIconClick = {
                     onEvent(DashboardEvent.OnDeleteSessionButtonClick(it))
                     isDeleteDialogOpen = true }

@@ -6,7 +6,7 @@ import com.example.studysmart.domain.model.Task
 
 sealed class DashboardEvent {
     data object SaveSubject: DashboardEvent()
-    data object DeleteSubject: DashboardEvent()
+    data object DeleteSession: DashboardEvent()
     data class OnDeleteSessionButtonClick(val session: Session): DashboardEvent()
     data class OnTaskIsCompleteChange(val task: Task): DashboardEvent()
 
