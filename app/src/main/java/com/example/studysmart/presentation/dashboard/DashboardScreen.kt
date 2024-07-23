@@ -72,6 +72,8 @@ navigator:DestinationsNavigator
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     DashboardScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
         onSubjectCardClick = {
             subjectId->
             subjectId?.let {
@@ -95,6 +97,8 @@ navigator:DestinationsNavigator
 
 @Composable
 private fun DashboardScreen(
+    state: DashBoardState,
+    onEvent: (DashboardEvent)->Unit,
     onSubjectCardClick:(Int?)->Unit,
     onTaskCardClick:(Int?)->Unit,
     onStartSessionButtonClick:()->Unit,
@@ -103,22 +107,23 @@ private fun DashboardScreen(
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
 
-    var subjectName by remember{ mutableStateOf("") }
-    var goalHours by remember{ mutableStateOf("") }
-    var selectedColor by remember {
-        mutableStateOf(Subject.subjectCardColors.random())
-    }
+//    var subjectName by remember{ mutableStateOf("") }
+//    var goalHours by remember{ mutableStateOf("") }
+//    var selectedColor by remember {
+//        mutableStateOf(Subject.subjectCardColors.random())
+//    }
 
     AddSubjectDialogBox(
         isOpen =isAddSubjectDialogOpen,
-        subjectName =subjectName ,
-        goalHours = goalHours,
-        onSubjectNameChange ={subjectName = it} ,
-        onGoalHoursChange = {goalHours = it},
-        selectedColor = selectedColor,
-        onColorChange = {selectedColor = it},
+        subjectName =state.subjectName ,
+        goalHours = state.goalStudyHours,
+        onSubjectNameChange ={onEvent(DashboardEvent.OnSubjectNameChange(it))} ,
+        onGoalHoursChange = {onEvent(DashboardEvent.OnGoalStudyHoursChange(it))},
+        selectedColor = state.subjectCardColors,
+        onColorChange = {onEvent(DashboardEvent.OnSubjectCardColorChange(it))},
         onDismissRequest = { isAddSubjectDialogOpen = false },
         onConfirmButtonClick={
+            onEvent(DashboardEvent.SaveSubject)
             isAddSubjectDialogOpen = false
         }
     )
@@ -129,7 +134,10 @@ private fun DashboardScreen(
         bodyText = "Are you sure you want to delete this session ? your study hours will be reduced " +
         "by this session time. This action can not be undone.",
         onDismissRequest = { isDeleteDialogOpen = false },
-        onConfirmButtonClick = { isDeleteDialogOpen = false }
+        onConfirmButtonClick = {
+            onEvent(DashboardEvent.DeleteSubject)
+            isDeleteDialogOpen = false
+        }
     )
 
     Scaffold(
@@ -145,13 +153,17 @@ private fun DashboardScreen(
                 CountCardsSection(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp) , subjectCount = 5 , studiedHours ="10" , goalHours = "12" )
+                        .padding(12.dp) ,
+                    subjectCount = state.totalSubjectCount ,
+                    studiedHours =state.totalStudiedHours.toString() ,
+                    goalHours = state.totalGoalStudyHours.toString()
+                )
             }
             item {
                 SubjectCardSection(
                     modifier = Modifier.fillMaxWidth() ,
                     //subjectList = emptyList()
-                    subjectList = subjects,
+                    subjectList = state.subjects,
                     onAddIconClicked = {
                         isAddSubjectDialogOpen = true
                     },
@@ -178,7 +190,9 @@ private fun DashboardScreen(
                 "Please click on the + icon to add new task.",
                 //tasks = emptyList()
                 tasks = tasks,
-                onCheckBoxClick = {},
+                onCheckBoxClick = {
+                                  onEvent(DashboardEvent.OnTaskIsCompleteChange(it))
+                },
                 onTaskCardClick = onTaskCardClick
 
             )
@@ -192,7 +206,9 @@ private fun DashboardScreen(
                 "Start a study session to begin recording your progress.",
                 //sessions = emptyList(),
                 sessions = sessions,
-                onDeleteIconClick = { isDeleteDialogOpen = true }
+                onDeleteIconClick = {
+                    onEvent(DashboardEvent.OnDeleteSessionButtonClick(it))
+                    isDeleteDialogOpen = true }
 
             )
         }

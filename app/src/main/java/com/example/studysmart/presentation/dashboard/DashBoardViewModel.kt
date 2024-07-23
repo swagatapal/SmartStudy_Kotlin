@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,6 +40,42 @@ class DashBoardViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = DashBoardState()
     )
+
+
+    fun onEvent(event: DashboardEvent){
+        when(event){
+            DashboardEvent.DeleteSubject -> {
+
+            }
+
+            is DashboardEvent.OnDeleteSessionButtonClick -> {
+                _state.update {
+                    it.copy(session = event.session)
+                }
+            }
+
+            is DashboardEvent.OnGoalStudyHoursChange -> {
+                _state.update {
+                    it.copy(goalStudyHours = event.hours)
+                }
+            }
+
+            is DashboardEvent.OnSubjectCardColorChange -> {
+                _state.update {
+                    it.copy(subjectCardColors = event.colors)
+                }
+            }
+
+            is DashboardEvent.OnSubjectNameChange -> {
+                _state.update {
+                    it.copy(subjectName = event.name)
+                }
+            }
+
+            is DashboardEvent.OnTaskIsCompleteChange -> TODO()
+            DashboardEvent.SaveSubject -> TODO()
+        }
+    }
 
 
 
