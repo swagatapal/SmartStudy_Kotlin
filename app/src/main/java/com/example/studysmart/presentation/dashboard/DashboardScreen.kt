@@ -24,10 +24,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -55,8 +59,11 @@ import com.example.studysmart.presentation.subject.SubjectScreenNavArgs
 import com.example.studysmart.presentation.task.TaskScreenNavArgs
 import com.example.studysmart.sessions
 import com.example.studysmart.tasks
+import com.example.studysmart.util.SnackbarEvent
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Destination(start=true)
 @Composable
@@ -74,6 +81,7 @@ navigator:DestinationsNavigator
         tasks = tasks,
         recentSessions = recentSessions,
         onEvent = viewModel::onEvent,
+        snackbarEvent = viewModel.snackbarEventFlow,
         onSubjectCardClick = {
             subjectId->
             subjectId?.let {
@@ -101,6 +109,7 @@ private fun DashboardScreen(
     tasks: List<Task>,
     recentSessions: List<Session>,
     onEvent: (DashboardEvent)->Unit,
+    snackbarEvent:SharedFlow<SnackbarEvent>,
     onSubjectCardClick:(Int?)->Unit,
     onTaskCardClick:(Int?)->Unit,
     onStartSessionButtonClick:()->Unit,
@@ -108,12 +117,28 @@ private fun DashboardScreen(
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
+    val snackbarHostState = remember {SnackbarHostState()}
 
 //    var subjectName by remember{ mutableStateOf("") }
 //    var goalHours by remember{ mutableStateOf("") }
 //    var selectedColor by remember {
 //        mutableStateOf(Subject.subjectCardColors.random())
 //    }
+
+    LaunchedEffect(key1 = true){
+        snackbarEvent.collectLatest { event->
+            when(event){
+                is SnackbarEvent.ShowSnackbar->{
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
+
+
 
     AddSubjectDialogBox(
         isOpen =isAddSubjectDialogOpen,
@@ -143,6 +168,7 @@ private fun DashboardScreen(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {DashboardScreenTopBar()}
     ) {
         paddingValues ->
