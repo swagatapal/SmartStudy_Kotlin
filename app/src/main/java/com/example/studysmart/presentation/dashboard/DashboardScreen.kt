@@ -61,11 +61,13 @@ import com.example.studysmart.sessions
 import com.example.studysmart.tasks
 import com.example.studysmart.util.SnackbarEvent
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
-@Destination(start=true)
+@RootNavGraph(start = true)
+@Destination()
 @Composable
 fun DashBoardScreenRoute(
 navigator:DestinationsNavigator
@@ -117,14 +119,13 @@ private fun DashboardScreen(
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
-    val snackbarHostState = remember {SnackbarHostState()}
 
 //    var subjectName by remember{ mutableStateOf("") }
 //    var goalHours by remember{ mutableStateOf("") }
 //    var selectedColor by remember {
 //        mutableStateOf(Subject.subjectCardColors.random())
 //    }
-
+    val snackbarHostState = remember {SnackbarHostState()}
     LaunchedEffect(key1 = true){
         snackbarEvent.collectLatest { event->
             when(event){
@@ -134,6 +135,8 @@ private fun DashboardScreen(
                         duration = event.duration
                     )
                 }
+
+                SnackbarEvent.NavigateUp -> {}
             }
         }
     }

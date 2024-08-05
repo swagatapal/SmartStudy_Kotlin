@@ -45,4 +45,11 @@ sealed class SnackbarEvent{
         val message: String,
         val duration: SnackbarDuration = SnackbarDuration.Short
     ):SnackbarEvent()
+
+
+    data object NavigateUp: SnackbarEvent()
+}
+
+fun Int.pad():String{
+    return this.toString().padStart(length = 2, padChar = '0')
 }

@@ -49,7 +49,7 @@ class DashBoardViewModel @Inject constructor(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
         initialValue = DashBoardState()
     )
 
@@ -101,13 +101,41 @@ class DashBoardViewModel @Inject constructor(
                 }
             }
 
-            is DashboardEvent.OnTaskIsCompleteChange -> TODO()
+            is DashboardEvent.OnTaskIsCompleteChange -> {
+                updateTask(event.task)
+            }
 
             DashboardEvent.SaveSubject -> saveSubject()
         }
     }
 
+    private fun updateTask(task: Task) {
+
+        viewModelScope.launch {
+            try {
+                taskRepository.upsertTask(
+                    task = task.copy(isComplete = !task.isComplete)
+                )
+                _snackbarEventFlow.emit(
+                    SnackbarEvent.ShowSnackbar(message = "Saved in completed tasks")
+                )
+
+            }catch (e:Exception){
+                _snackbarEventFlow.emit(
+                    SnackbarEvent.ShowSnackbar("Could not update task. ${e.message}",
+                        SnackbarDuration.Long)
+                )
+
+            }
+
+
+        }
+
+
+    }
+
     private fun saveSubject() {
+
         viewModelScope.launch {
             try {
                 subjectRepository.upsertSubject(
@@ -139,6 +167,7 @@ class DashBoardViewModel @Inject constructor(
 
 
         }
+
     }
 
 
